@@ -145,5 +145,46 @@ void HelloWorld::updateDrawNode(float dt)
     drawNode->drawDot(getSprite(120110)->getPosition() + Vec2(0,50), 3, Color4F(255, 255, 34, 1));
 }
 
+//
+Vec2 getRandomPositionByMinLen(Vec2 anchor,Vec2 posNow,float w,float h,float len)
+{
+    //随机点
+    float temp_x = CCRANDOM_0_1() * w;
+    float temp_y = CCRANDOM_0_1() * h;
+    
+    //下一个点
+    Vec2 posNext = anchor + Vec2(temp_x,temp_y);
+    
+    //求当前位置和下一个点位置的距离
+    float temp_len = posNow.getDistance(posNext);
+    
+    //基准长度
+    len *= 2;
+    
+    //如果两点小于等于基准长度
+    if(temp_len < len)
+    {
+        //判断当前点在中心点位置
+        if(posNow.x <= anchor.x)
+        {
+            //在左边
+            temp_x += (len * 2) + (CCRANDOM_0_1()*10);
+        }
+        else
+        {
+            //在右边
+            temp_x -= (len * 2) + (CCRANDOM_0_1()*10);
+        }
+    }
+    
+    //随机正负
+    temp_x *= (CCRANDOM_0_1() > 0.5f) ? -1 : 1;
+    temp_y *= (CCRANDOM_0_1() > 0.5f) ? -1 : 1;
+    
+    //重新组建点
+    posNext = Vec2(temp_x,temp_y);
+    
+    return anchor + posNext;
+}
 
 
