@@ -18,7 +18,7 @@ public:
     cocos2d::Size size;
 private:
     
-    /* 跟随测试 */
+    /* 目标跟随手指移动测试 */
     void testFollow();
     cocos2d::Sprite* getSprite(int tag);
     //跟随定时器
@@ -29,6 +29,11 @@ private:
     /* 在一定范围内（大矩形和小矩形），返回一个点 */
     /* 在一定范围内（矩形），返回一个点 与传入点有一定距离 */
     cocos2d::Vec2 getRandomPositionByMinLen(cocos2d::Vec2 anchor,cocos2d::Vec2 posNow,float w,float h,float len);
+
+	/* 跟随目标转动测试 */
+	void testTurn();
+	//转动定时器
+	void updateDegree(float dt);
 };
 
 #endif // __HELLOWORLD_SCENE_H__

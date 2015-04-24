@@ -29,10 +29,11 @@ bool HelloWorld::init()
     
     //设置背景
     auto background = LayerColor::create(Color4B(255, 255, 235, 255));
-    addChild(background);
+    //addChild(background);
 
     //显示某个功能
-    testFollow();
+    //testFollow();
+	testTurn();
     
     return true;
 }
@@ -40,12 +41,12 @@ bool HelloWorld::init()
 //跟随测试
 void HelloWorld::testFollow()
 {
-    auto hero = Sprite::create("res/CloseNormal.png");
+    auto hero = Sprite::create("CloseNormal.png");
     hero->setPosition(size.width / 2,size.height / 2 - 50);
     this->addChild(hero);
     hero->setTag(120110);
     
-    auto follow = Sprite::create("res/CloseNormal.png");
+    auto follow = Sprite::create("CloseNormal.png");
     follow->setPosition(size.width / 2,size.height / 2);
     this->addChild(follow);
     follow->setTag(120111);
@@ -185,6 +186,91 @@ Vec2 getRandomPositionByMinLen(Vec2 anchor,Vec2 posNow,float w,float h,float len
     posNext = Vec2(temp_x,temp_y);
     
     return anchor + posNext;
+}
+
+void HelloWorld::testTurn()
+{
+	auto m_pTargetSprite = CCSprite::create("CloseNormal.png");
+	m_pTargetSprite->setPosition(ccp(0, size.height / 2));
+	addChild(m_pTargetSprite);
+	m_pTargetSprite->setTag(101);
+
+	auto m_pFollowSprite = CCSprite::create("CloseNormal.png");
+	m_pFollowSprite->setPosition(ccp(size.width / 2, size.height / 2));
+	addChild(m_pFollowSprite);
+	m_pFollowSprite->setTag(102);
+
+	//粒子
+	auto particle = ParticleSystemQuad::create("dd.plist");
+	particle->setAutoRemoveOnFinish(true);
+	m_pTargetSprite->addChild(particle,1,200);
+
+	auto listener = EventListenerTouchOneByOne::create();
+	listener->onTouchBegan = [m_pTargetSprite](Touch* touch,Event* event)
+	{
+		Vec2 pos = touch->getLocation();
+
+		if(m_pTargetSprite->boundingBox().containsPoint(pos))
+		{
+			return true;
+		}
+
+		return false;
+	};
+	listener->onTouchMoved = [m_pTargetSprite](Touch* touch,Event* event)
+	{
+		m_pTargetSprite->setPosition(touch->getLocation());
+
+		auto particle = (ParticleSystemQuad*)m_pTargetSprite->getChildByTag(200);
+		particle->setPosition(ccp(m_pTargetSprite->getContentSize().width / 2,m_pTargetSprite->getContentSize().height / 2));
+
+	};
+	listener->onTouchEnded = [m_pTargetSprite](Touch* touch,Event* event)
+	{
+		m_pTargetSprite->setPosition(touch->getLocation());
+	};
+	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener,this);
+
+	this->schedule(schedule_selector(HelloWorld::updateDegree));
+
+}
+
+//转动定时器
+void HelloWorld::updateDegree(float dt)
+{
+	auto m_pTargetSprite = this->getChildByTag(101);
+	auto m_pFollowSprite = this->getChildByTag(102);
+
+	auto subPos = ccpSub(m_pTargetSprite->getPosition(), m_pFollowSprite->getPosition());
+
+    auto normaiizePos = ccpNormalize(subPos);
+
+    float radian = atan(normaiizePos.x / normaiizePos.y);
+
+    float degree = CC_RADIANS_TO_DEGREES(radian);
+
+	/*
+	       0
+	负	   *      正
+		   *
+	-90    *      90
+	**************
+	90     *      -90
+		   *
+	正	   *      负
+		   0
+	*/
+
+    //第三四象限 角度+180
+    if(normaiizePos.y < 0)
+    {
+        degree = degree + 180;
+    }
+
+    CCLOG("degree == %0.2f", degree);
+
+    m_pFollowSprite->setRotation(degree);
+
 }
 
 
